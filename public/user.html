@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Dashboard — Study With Sundaram</title>
+<link rel="icon" href="/assets/icon.png" />
+<link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="brand">
+    <img src="/assets/icon.png" alt="logo" />
+    <div class="brand-text">
+      <div class="brand-title">Study With Sundaram</div>
+      <div class="brand-sub">LEARN &middot; GROW &middot; SUCCEED</div>
+    </div>
+  </div>
+  <div class="nav-actions">
+    <button class="btn-logout" style="border-color:rgba(255,255,255,0.3); color:#fff;" onclick="openProfileModal()">👤 My Profile</button>
+    <span class="pill" id="welcomePill">Hi, Student</span>
+    <button class="btn-logout" onclick="logout()">Logout</button>
+  </div>
+</nav>
+
+<div class="shell">
+  <div class="banner-wrap">
+    <img src="/assets/banner.png" alt="Study With Sundaram banner" />
+  </div>
+
+  <div id="courseListView">
+    <div class="page-head">
+      <div>
+        <h1>Aapke Courses</h1>
+        <p>Course kholiye aur study material + video lectures dekhiye.</p>
+      </div>
+    </div>
+    <div id="courseGrid" class="grid">
+      <div class="loader"><div class="spinner"></div> Loading courses...</div>
+    </div>
+  </div>
+
+  <div id="courseDetailView" style="display:none;">
+    <button class="btn btn-outline btn-sm" onclick="backToCourses()">&larr; Sabhi Courses</button>
+    <div class="page-head" style="margin-top:16px;">
+      <div>
+        <h1 id="detailCourseTitle"></h1>
+        <p id="detailCourseDesc"></p>
+      </div>
+    </div>
+
+    <div id="lockedSection" style="display:none;"></div>
+
+    <div id="unlockedSections" style="display:none;">
+      <div class="section-title"><h2>📚 Study Material</h2><span class="count" id="materialCount"></span></div>
+      <div id="materialList"></div>
+
+      <div class="section-title"><h2>🎥 Video Lectures</h2><span class="count" id="videoCount"></span></div>
+      <div id="videoList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Buy / Payment Modal -->
+<div class="modal-overlay" id="buyModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeBuyModal()">&times;</button>
+    <h3 id="buyModalTitle">Buy Course</h3>
+    <p style="color:var(--muted); font-size:14px; margin-bottom:10px;">Neeche diye gaye QR ko scan karke <strong id="buyModalAmount"></strong> pay karein, phir apna UTR / Transaction ID neeche daalein.</p>
+    <div style="text-align:center; margin-bottom:14px;">
+      <img id="buyModalQrImg" alt="Payment QR" style="max-width:220px; border-radius:10px; border:1px solid var(--border);" />
+      <p id="buyModalUpi" style="font-size:13px; color:var(--navy); font-weight:600; margin-top:8px;"></p>
+    </div>
+    <form id="paymentForm" onsubmit="submitPayment(event)">
+      <div class="field">
+        <label>UTR / Transaction ID</label>
+        <input type="text" id="utrInput" placeholder="e.g. 123456789012" required />
+      </div>
+      <button type="submit" class="btn btn-primary btn-block" id="submitPaymentBtn">Submit Payment</button>
+    </form>
+  </div>
+</div>
+
+<!-- Profile Modal -->
+<div class="modal-overlay" id="profileModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModalById('profileModal')">&times;</button>
+    <h3>👤 My Profile</h3>
+    <div id="profileAlert" class="alert"></div>
+    <form id="profileForm">
+      <div class="field">
+        <label>Full Name</label>
+        <input type="text" id="profileName" required />
+      </div>
+      <div class="field">
+        <label>Email (fixed)</label>
+        <input type="email" id="profileEmail" disabled style="background:#f0f2f7; color:var(--muted);" />
+      </div>
+      <div class="field">
+        <label>Phone Number</label>
+        <input type="text" id="profilePhone" placeholder="e.g. 9876543210" />
+      </div>
+      <div class="field">
+        <label>Class / Course Level</label>
+        <input type="text" id="profileClass" placeholder="e.g. Class 10, B.A. 2nd Year" />
+      </div>
+      <div class="field">
+        <label>Address</label>
+        <textarea id="profileAddress" rows="2" placeholder="Aapka address"></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block" id="profileSaveBtn">Save Details</button>
+    </form>
+
+    <hr style="margin:22px 0; border:none; border-top:1px solid var(--border);" />
+
+    <h3 style="font-size:16px;">🔒 Change Password</h3>
+    <form id="passwordForm">
+      <div class="field">
+        <label>Current Password</label>
+        <input type="password" id="currentPassword" required />
+      </div>
+      <div class="field">
+        <label>New Password</label>
+        <input type="password" id="newPassword" required minlength="6" />
+      </div>
+      <button type="submit" class="btn btn-outline btn-block" id="passwordSaveBtn">Change Password</button>
+    </form>
+  </div>
+</div>
+
+<footer class="app-footer">Study With Sundaram &copy; 2026 — Believe in Learning, Believe in Yourself.</footer>
+
+<!-- Video Player Modal -->
+<div class="modal-overlay video-modal" id="videoModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeVideoModal()">&times;</button>
+    <h3 id="videoModalTitle">Video</h3>
+    <video id="videoPlayer" controls></video>
+  </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script src="/js/user.js"></script>
+</body>
+</html>

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Admin Dashboard — Study With Sundaram</title>
+<link rel="icon" href="/assets/icon.png" />
+<link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="brand">
+    <img src="/assets/icon.png" alt="logo" />
+    <div class="brand-text">
+      <div class="brand-title">Study With Sundaram</div>
+      <div class="brand-sub">ADMIN PANEL</div>
+    </div>
+  </div>
+  <div class="nav-actions">
+    <span class="pill" id="welcomePill">Hi, Admin</span>
+    <button class="btn-logout" onclick="logout()">Logout</button>
+  </div>
+</nav>
+
+<div class="shell">
+  <div class="page-head">
+    <div>
+      <h1>Admin Dashboard</h1>
+      <p>Courses, study material aur video lectures manage karein.</p>
+    </div>
+    <button class="btn btn-primary" onclick="openModal('courseModal')">+ Naya Course</button>
+  </div>
+
+  <div class="stats-grid" id="statsGrid"></div>
+
+  <div class="admin-tabs">
+    <button class="active" onclick="switchAdminTab('courses')" id="tabBtnCourses">📘 Courses</button>
+    <button onclick="switchAdminTab('payments')" id="tabBtnPayments">💰 Payments <span id="pendingBadge" class="badge" style="display:none; background:var(--danger); color:#fff; margin-left:4px;"></span></button>
+    <button onclick="switchAdminTab('users')" id="tabBtnUsers">👥 Users</button>
+    <button onclick="switchAdminTab('settings')" id="tabBtnSettings">⚙️ Payment Settings</button>
+  </div>
+
+  <div id="adminCoursesTab">
+    <div id="courseGrid" class="grid">
+      <div class="loader"><div class="spinner"></div> Loading courses...</div>
+    </div>
+  </div>
+
+  <div id="adminUsersTab" style="display:none;">
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Phone</th><th>Class</th><th>Joined</th><th>Action</th></tr></thead>
+        <tbody id="usersTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="adminPaymentsTab" style="display:none;">
+    <div class="admin-tabs" style="margin-bottom:16px;">
+      <button class="active" onclick="filterPayments('pending')" id="filterPending">⏳ Pending</button>
+      <button onclick="filterPayments('approved')" id="filterApproved">✅ Approved</button>
+      <button onclick="filterPayments('rejected')" id="filterRejected">❌ Rejected</button>
+      <button onclick="filterPayments('')" id="filterAll">📋 Sabhi</button>
+    </div>
+    <div id="paymentsList"></div>
+  </div>
+
+  <div id="adminSettingsTab" style="display:none;">
+    <div class="card" style="max-width:460px;">
+      <h3>💳 Payment / UPI QR Settings</h3>
+      <p class="desc">Yahan apna merchant UPI QR code aur UPI ID set karein. Yehi QR students ko "Buy Now" karte waqt dikhega.</p>
+      <div id="currentQrPreview" style="text-align:center; margin-bottom:16px;"></div>
+      <form id="settingsForm">
+        <div class="field">
+          <label>UPI ID (optional, students ko reference ke liye dikhega)</label>
+          <input type="text" id="upiIdInput" placeholder="e.g. yourname@upi" />
+        </div>
+        <div class="field">
+          <label>QR Code Image (JPG/PNG)</label>
+          <input type="file" id="qrFileInput" accept=".jpg,.jpeg,.png" />
+        </div>
+        <button type="submit" class="btn btn-primary btn-block" id="settingsSubmitBtn">Save Settings</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- COURSE DETAIL / MANAGE VIEW -->
+  <div id="courseDetailView" style="display:none;">
+    <button class="btn btn-outline btn-sm" onclick="backToCourses()">&larr; Sabhi Courses</button>
+    <div class="page-head" style="margin-top:16px;">
+      <div>
+        <h1 id="detailCourseTitle"></h1>
+        <p id="detailCourseDesc"></p>
+        <p style="margin-top:8px;"><span class="badge" id="detailCoursePrice" style="background:#e4ecff; color:var(--navy-light);"></span></p>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-outline btn-sm" onclick="openEditPrice()">✏️ Price Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteCourse()">🗑 Course Delete Karein</button>
+      </div>
+    </div>
+
+    <div class="section-title">
+      <h2>📚 Study Material</h2>
+      <button class="btn btn-navy btn-sm" onclick="openModal('materialModal')">+ Material Upload</button>
+    </div>
+    <div id="materialList"></div>
+
+    <div class="section-title">
+      <h2>🎥 Video Lectures <span style="font-size:12px; color:var(--muted); font-weight:500;">(feature — session-based)</span></h2>
+      <button class="btn btn-navy btn-sm" onclick="openModal('videoModal')">+ Video Upload</button>
+    </div>
+    <div id="videoList"></div>
+  </div>
+</div>
+
+<footer class="app-footer">Study With Sundaram &copy; 2026 — Admin Panel</footer>
+
+<!-- CREATE COURSE MODAL -->
+<div class="modal-overlay" id="courseModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('courseModal')">&times;</button>
+    <h3>Naya Course Banayein</h3>
+    <form id="courseForm">
+      <div class="field">
+        <label>Course Title</label>
+        <input type="text" id="courseTitle" placeholder="e.g. Class 10th Mathematics" required />
+      </div>
+      <div class="field">
+        <label>Description</label>
+        <textarea id="courseDesc" rows="3" placeholder="Course ke baare mein short description"></textarea>
+      </div>
+      <div class="field">
+        <label>Price (₹) — 0 rakhein agar course FREE rakhna hai</label>
+        <input type="number" id="coursePrice" min="0" step="1" placeholder="e.g. 499" value="0" />
+      </div>
+      <button type="submit" class="btn btn-primary btn-block">Course Create Karein</button>
+    </form>
+  </div>
+</div>
+
+<!-- EDIT USER MODAL -->
+<div class="modal-overlay" id="editUserModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('editUserModal')">&times;</button>
+    <h3>User Details Edit Karein</h3>
+    <form id="editUserForm">
+      <input type="hidden" id="editUserId" />
+      <div class="field">
+        <label>Full Name</label>
+        <input type="text" id="editUserName" required />
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="editUserEmail" required />
+      </div>
+      <div class="field">
+        <label>Role</label>
+        <select id="editUserRole">
+          <option value="user">User (Student)</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Phone</label>
+        <input type="text" id="editUserPhone" placeholder="e.g. 9876543210" />
+      </div>
+      <div class="field">
+        <label>Class / Course Level</label>
+        <input type="text" id="editUserClass" placeholder="e.g. Class 10" />
+      </div>
+      <div class="field">
+        <label>Address</label>
+        <textarea id="editUserAddress" rows="2"></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block">Update User</button>
+    </form>
+
+    <hr style="margin:18px 0; border:none; border-top:1px solid var(--border);" />
+    <h3 style="font-size:15px;">🔒 Reset Password</h3>
+    <form id="resetPasswordForm">
+      <div class="field">
+        <label>New Password</label>
+        <input type="password" id="resetPasswordInput" minlength="6" required />
+      </div>
+      <button type="submit" class="btn btn-outline btn-block">Reset Password</button>
+    </form>
+  </div>
+</div>
+
+<!-- EDIT PRICE MODAL -->
+<div class="modal-overlay" id="editPriceModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('editPriceModal')">&times;</button>
+    <h3>Course Price Edit Karein</h3>
+    <form id="editPriceForm">
+      <div class="field">
+        <label>Price (₹) — 0 rakhein agar FREE karna hai</label>
+        <input type="number" id="editPriceInput" min="0" step="1" required />
+      </div>
+      <button type="submit" class="btn btn-primary btn-block">Update Price</button>
+    </form>
+  </div>
+</div>
+
+<!-- UPLOAD MATERIAL MODAL -->
+<div class="modal-overlay" id="materialModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('materialModal')">&times;</button>
+    <h3>Study Material Upload Karein</h3>
+    <form id="materialForm">
+      <div class="field">
+        <label>Title</label>
+        <input type="text" id="materialTitle" placeholder="e.g. Chapter 1 Notes" required />
+      </div>
+      <div class="field">
+        <label>File (PDF, DOC, PPT, Image, TXT — max 25MB)</label>
+        <input type="file" id="materialFile" accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png,.txt" required />
+      </div>
+      <button type="submit" class="btn btn-primary btn-block" id="materialSubmitBtn">Upload</button>
+    </form>
+  </div>
+</div>
+
+<!-- UPLOAD VIDEO MODAL -->
+<div class="modal-overlay" id="videoModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('videoModal')">&times;</button>
+    <h3>Video Lecture Upload Karein</h3>
+    <form id="videoForm">
+      <div class="field">
+        <label>Title</label>
+        <input type="text" id="videoTitle" placeholder="e.g. Lecture 1 — Introduction" required />
+      </div>
+      <div class="field">
+        <label>Video File (mp4, webm, mov, mkv — max 500MB)</label>
+        <input type="file" id="videoFile" accept=".mp4,.webm,.mov,.mkv" required />
+      </div>
+      <div id="uploadProgressWrap" style="display:none;">
+        <div class="progress-bar" style="width:100%;"><div class="fill" id="uploadProgressFill" style="width:0%;"></div></div>
+        <p style="font-size:12px; color:var(--muted); margin-top:6px;" id="uploadProgressText">Uploading...</p>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block" id="videoSubmitBtn" style="margin-top:14px;">Upload Video</button>
+    </form>
+  </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script src="/js/admin.js"></script>
+</body>
+</html>

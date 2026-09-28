@@ -1,0 +1,11 @@
+node_modules/
+data/*.db
+data/*.db-*
+uploads/materials/*
+uploads/videos/*
+uploads/courses/*
+!uploads/materials/.gitkeep
+!uploads/videos/.gitkeep
+!uploads/courses/.gitkeep
+!uploads/settings/.gitkeep
+.env
