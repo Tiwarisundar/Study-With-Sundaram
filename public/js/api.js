@@ -3,7 +3,7 @@
 // 👇 IMPORTANT: Render pe deploy karne ke baad, apna backend ka URL yahan daalo
 // Example: 'https://study-with-sundaram.onrender.com/api'
 const Api = {
-  base: 'https://YOUR-BACKEND-NAME.onrender.com/api',
+  base: 'https://study-with-sundaram-in.onrender.com/api',
 
   getToken() {
     return localStorage.getItem('nsp_token');
